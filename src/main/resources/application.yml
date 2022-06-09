@@ -1,0 +1,31 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: admin-service
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/admin?serverTimezone=UTC
+    username: root
+    password: root
+# security:
+#   user:
+#     name: name
+#     password: 123
+#myBatis-plus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**Dao.xml     #.xml目录 可以配置多个
+  type-aliases-package: com.admin.dao # 扫描的dao接口的位置
+
+logging:
+  level:
+    com:
+      admin:
+        dao: DEBUG
+jwt:
+  header: Authorization
+  expire: 604880 #7天
+  secret: 1234567890qwertyuiopasdfghjklzx
+
+
+
