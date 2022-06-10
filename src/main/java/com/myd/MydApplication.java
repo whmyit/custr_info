@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.*"})
+@ComponentScan(basePackages = {"com.myd.dao*"})
 //@EnableScheduling
 public class MydApplication {
 

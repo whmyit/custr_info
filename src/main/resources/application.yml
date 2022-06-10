@@ -15,17 +15,14 @@ spring:
 #myBatis-plus
 mybatis-plus:
   mapper-locations: classpath*:mapper/**Dao.xml     #.xml目录 可以配置多个
-  type-aliases-package: com.admin.dao # 扫描的dao接口的位置
+  type-aliases-package: com.myd.dao # 扫描的dao接口的位置
 
 logging:
   level:
     com:
       admin:
         dao: DEBUG
-jwt:
-  header: Authorization
-  expire: 604880 #7天
-  secret: 1234567890qwertyuiopasdfghjklzx
+
 
 
 
