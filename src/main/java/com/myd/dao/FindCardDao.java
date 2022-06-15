@@ -3,6 +3,8 @@ package com.myd.dao;
 import com.myd.domain.*;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public interface FindCardDao  {
 
@@ -20,7 +22,7 @@ public interface FindCardDao  {
 
     Acct fingAcct(String glbBank, String unCk_acct);
 
-    Linx findLinx3(String dbCurfom2, String glbBank, String chL214_id18, String unAccount, String unCd_hid, String unAppjday, String unAppseq, String s, String s1);
+    List<Linx> findLinx3(String dbCurfom2, String glbBank, String chL214_id18, String unAccount, String unCd_hid, String unAppjday, String unAppseq, String s, String s1);
 
     Custr findCustr(String glbBank, String cardNbr);
 
