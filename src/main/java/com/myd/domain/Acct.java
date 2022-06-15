@@ -11,4 +11,11 @@ public class Acct {
 
     private Integer  prodLffl;
 
+    private String category;
+
+    private String currNum;
+
+    private String currNum2;
+    private String closeCode;
+
 }

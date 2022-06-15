@@ -38,23 +38,23 @@ public class FindCardService {
 
 
         //TODO 输出报文赋值
+        ReturnParam returnParam = new ReturnParam();
+        returnParam.setKeyType(param.getKetType());
+        returnParam.setCustid(param.getCustId());
+        Cyclout cyclout = new Cyclout();
 
         ServiceResponse serviceResponse = new ServiceResponse();
-
         String employeeN = Const.GLB_EMPLOYEE_N;
-
         if (StringUtils.isEmpty(employeeN)) {
             serviceResponse.setresultCode(-1);
             serviceResponse.setresultDesc("9071");  //操作人员编号
             return serviceResponse;
         }
-
         if (StringUtils.isEmpty(param.getKetType())) {
             serviceResponse.setresultCode(-1);
             serviceResponse.setresultDesc("9004"); //证件类型
             return serviceResponse;
         }
-
         if (StringUtils.isEmpty(param.getCustId())) {
             serviceResponse.setresultCode(-1);
             serviceResponse.setresultDesc("9005");//证件号码
@@ -98,6 +98,11 @@ public class FindCardService {
             serviceResponse.setresultDesc("3403"); //不能处理非本行卡片
         }
         //TODO  输出报文赋值
+        returnParam.setCustrName(custr.getSurName());
+        returnParam.setHomePhone(custr.getHomePhone());
+        returnParam.setBusiPhone(custr.getBusiPhone());
+        returnParam.setBusiex(custr.getExtension());
+        returnParam.setMobilePhone(custr.getMoPhone());
 
         chAsst = "0";
         Asst asst = findCardDao.findAsst(Const.DB_CURFOM2, Const.GLB_BANK, chL214_id18);
@@ -122,11 +127,12 @@ public class FindCardService {
             }
             card = findCardDao.findCardTable(linx.getCardNbr());
             //TODO  306  输出报文赋值
-
             String property = "1";
+            returnParam.setProperty(property);
         }
         if ("1".equals(chAsst)) {
             String property = "U";
+            returnParam.setProperty(property);
             Linx linx = findCardDao.findLinx(Const.DB_CURFOM2, Const.GLB_BANK, chL214_id18);
 
             if (("C".equals(linx.getFntryRsn()) && (linx.getBussinfss().length() == 0))) {
@@ -187,6 +193,10 @@ public class FindCardService {
             Acct acct = findCardDao.fingAcct(Const.GLB_BANK, unCk_acct);
 
             //TODO 出参赋值
+            cyclout.setCategory(acct.getCategory());
+            cyclout.setCurrNum(acct.getCurrNum());
+            cyclout.setCurrNum2(acct.getCurrNum2());
+            returnParam.setCyclout(cyclout);
 
         } else {
             unAccount = "0";
@@ -195,6 +205,9 @@ public class FindCardService {
             unAppseq = "999999";
             //TODO 496
         }
+
+
+        //助理查询所有信息
         if ("1".equals(chAsst)) {
             unCount = 0;
             unFlag = "0";
@@ -223,11 +236,24 @@ public class FindCardService {
                 }
                 //查询custr获取持卡人相关信息
                 Custr custr1 = findCardDao.findCustr(Const.GLB_BANK, linx.getCardNbr());
+
                 //TODO    输出报文赋值
+                cyclout.setCardName(custr1.getCardName());
+                cyclout.setRtnHomePhome(custr1.getHomePhone());
+                cyclout.setRtnBusiPhone(custr.getBusiPhone());
+                cyclout.setRtnBusiex(custr.getExtension());
+                cyclout.setRtnMonilePhone(custr1.getMoPhone());
+                cyclout.setRtnCustId(custr1.getCustrNbr());
+                cyclout.setIdTp(custr1.getRaceCode());
 
                 //查询card获取持卡人相关信息
                 Card card1 = findCardDao.findCardTable1(linx.getCardNbr(), linx.getCardholder());
+
                 //TODO    输出报文赋值
+                cyclout.setCardnbr(card1.getCardNbr());
+                cyclout.setExpire(card1.getExpiryDte());
+                //CmdN2A() 643
+                cyclout.setMaFlag("");
 
                 //日期转化
                 if (card.getIssueDay().equals(Const.DC_DAYNUM)) {
@@ -235,6 +261,12 @@ public class FindCardService {
                 } else {
                     //TODO    输出报文赋值
                 }
+
+                cyclout.setProduct(card1.getProduct());
+                cyclout.setAppsource(card1.getAppSource());
+                cyclout.setEmbname(card1.getEmbossNme());
+                cyclout.setPbFlag("P");
+
                 Busns busns = null;
                 if (linx.getBussinfss().length() != 0) {
                     //查找公司编号
@@ -242,15 +274,32 @@ public class FindCardService {
                 }
                 if ("1".equals(busns.getBusnsType())) {
                     /*专用公司卡*/
+                    cyclout.setPbFlag("P");
                 }
+
                 //TODO    输出报文赋值
+                cyclout.setCardstat(card1.getCanclCode());
+                cyclout.setAsstFg("U");
+                cyclout.setFeeCode(card1.getFeeCode());
+
+                Acct acct = null;
                 if (!linx.getXaccount().equals(unCk_acct)) {
                     unCk_acct = "0";
                     unCk_acct = linx.getXaccount();
                     /*获得账号和币种*/
-                    Acct acct = findCardDao.findAcct(linx.getBank(), unCk_acct);
+                    acct = findCardDao.findAcct(linx.getBank(), unCk_acct);
                 }
+
                 //TODO    输出报文赋值
+                cyclout.setCategory(acct.getCategory());
+                cyclout.setCurrNum(acct.getCurrNum());
+                cyclout.setCurrNum2(acct.getCurrNum2());
+
+                cyclout.setVcnSts(card1.getVcnSts());
+                cyclout.setIssMod(card1.getIssMod());
+                cyclout.setCloseCode(acct.getCloseCode());
+
+
                 if (unCount > 5) {
                     unFlag1 = "1";
                 }
@@ -297,33 +346,67 @@ public class FindCardService {
                         //continute;
                     }
                 }
+                Acct acct = null;
                 if (linx.getXaccount() != unCk_acct) {
                     unCk_acct = "0";
                     unCk_acct = linx.getXaccount();
-                    Acct acct = findCardDao.findAcct(linx.getBank(), unCk_acct);
+                    acct = findCardDao.findAcct(linx.getBank(), unCk_acct);
                 }
                 //TODO    输出报文赋值
+                cyclout.setCategory(acct.getCategory());
+                cyclout.setCurrNum(acct.getCurrNum());
+                cyclout.setCurrNum2(acct.getCurrNum2());
+
                 //获取custr表中持卡人的信息
                 Custr custr1 = findCardDao.findCustr(Const.GLB_BANK, linx.getCardNbr());
+
                 //TODO    输出报文赋值
+                cyclout.setCardName(custr1.getCardName());
+                cyclout.setRtnHomePhome(custr1.getHomePhone());
+                cyclout.setRtnBusiPhone(custr.getBusiPhone());
+                cyclout.setRtnBusiex(custr.getExtension());
+                cyclout.setRtnMonilePhone(custr1.getMoPhone());
+                cyclout.setRtnCustId(custr1.getCustrNbr());
+                cyclout.setIdTp(custr1.getRaceCode());
 
                 //查询card获取持卡人相关信息
                 Card card1 = findCardDao.findCardTable1(linx.getCardNbr(), linx.getCardholder());
+
                 //TODO    输出报文赋值
+                cyclout.setCardnbr(card1.getCardNbr());
+                cyclout.setExpire(card1.getExpiryDte());
+                //CmdN2A() 1000
+                cyclout.setMaFlag("");
+
                 if ("0".equals(card1.getIssueDay())) {
                     // 日期转化  赋值操作
                 } else {
                     //赋值操作
                 }
+
+                cyclout.setProduct(card1.getProduct());
+                cyclout.setAppsource(card1.getAppSource());
+                cyclout.setEmbname(card1.getEmbossNme());
+                cyclout.setPbFlag("P");
+
                 //TODO    输出报文赋值
                 Busns busns = null;
                 if (linx.getBusinfss().length() != 0) {
                     busns = findCardDao.findBusns(linx.getBank(), linx.getBusinfss());
                     if ("1".equals(busns.getBusnsType())) {
                         /*专用公司卡*/
+                        cyclout.setPbFlag("S");
                     }
                 }
                 //TODO    输出报文赋值
+                cyclout.setCardstat(card1.getCanclCode());
+                cyclout.setAsstFg("I");
+                cyclout.setFeeCode(card1.getFeeCode());
+
+                cyclout.setVcnSts(card1.getVcnSts());
+                cyclout.setIssMod(card1.getIssMod());
+                cyclout.setCloseCode(acct.getCloseCode());
+
             }
             unAccount = "0";
             unCd_hid = "0";
@@ -343,11 +426,24 @@ public class FindCardService {
 
             //查询custr获取持卡人相关信息
             Custr custr1 = findCardDao.findCustr(Const.GLB_BANK, linx.getCardNbr());
+
             //TODO    输出报文赋值
+            cyclout.setCardName(custr1.getCardName());
+            cyclout.setRtnHomePhome(custr1.getHomePhone());
+            cyclout.setRtnBusiPhone(custr.getBusiPhone());
+            cyclout.setRtnBusiex(custr.getExtension());
+            cyclout.setRtnMonilePhone(custr1.getMoPhone());
+            cyclout.setRtnCustId(custr1.getCustrNbr());
+            cyclout.setIdTp(custr1.getRaceCode());
 
             //查询card获取持卡人相关信息
             Card card1 = findCardDao.findCardTable1(linx.getCardNbr(), linx.getCardholder());
+
             //TODO    输出报文赋值
+            cyclout.setCardnbr(card1.getCardNbr());
+            cyclout.setExpire(card1.getExpiryDte());
+            //CmdN2A() 643
+            cyclout.setMaFlag("");
 
             //日期转化
             if (card.getIssueDay().equals(Const.DC_DAYNUM)) {
@@ -355,6 +451,12 @@ public class FindCardService {
             } else {
                 //TODO    输出报文赋值
             }
+
+            cyclout.setProduct(card1.getProduct());
+            cyclout.setAppsource(card1.getAppSource());
+            cyclout.setEmbname(card1.getEmbossNme());
+            cyclout.setPbFlag("P");
+
             Busns busns = null;
             if (linx.getBussinfss().length() != 0) {
                 //查找公司编号
@@ -362,15 +464,28 @@ public class FindCardService {
             }
             if ("1".equals(busns.getBusnsType())) {
                 /*专用公司卡*/
+                cyclout.setProduct("S");
+
             }
             //TODO    输出报文赋值
+            cyclout.setCardstat(card1.getCanclCode());
+            cyclout.setAsstFg("I");
+            cyclout.setFeeCode(card1.getFeeCode());
+
+            Acct acct = null;
             if (!linx.getXaccount().equals(unCk_acct)) {
                 unCk_acct = "0";
                 unCk_acct = linx.getXaccount();
                 /*获得账号和币种*/
-                Acct acct = findCardDao.findAcct(linx.getBank(), unCk_acct);
+                acct = findCardDao.findAcct(linx.getBank(), unCk_acct);
             }
             //TODO    输出报文赋值
+            cyclout.setCategory(acct.getCategory());
+            cyclout.setCurrNum(acct.getCurrNum());
+            cyclout.setCurrNum2(acct.getCurrNum2());
+            cyclout.setVcnSts(card1.getVcnSts());
+            cyclout.setIssMod(card1.getIssMod());
+            cyclout.setCloseCode(acct.getCloseCode());
         }
         if (0 == unCount) {
             serviceResponse.setresultCode(-1);

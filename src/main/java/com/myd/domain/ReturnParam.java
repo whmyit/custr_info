@@ -22,6 +22,7 @@ public class ReturnParam {
     private String  property;//证件归属标注
     private String  count;//本次返回交易条数
     private String  rtnInd;//翻页标注
+    private Cyclout cyclout;
 
 
 }
